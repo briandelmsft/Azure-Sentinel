@@ -18,7 +18,7 @@ query: |
   //Inactive accounts that sign in - first-time logins for accounts created in last 7 days are filtered out
   let starttime = 14d;
   let midtime = 7d;
-  let endtime = 1d;
+  let endtime = 2d;
   SigninLogs
   | where TimeGenerated >= ago(endtime)
   // successful sign-in
