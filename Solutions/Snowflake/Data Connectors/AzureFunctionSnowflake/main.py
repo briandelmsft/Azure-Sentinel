@@ -25,7 +25,7 @@ SHARED_KEY = os.environ['SHARED_KEY']
 FILE_SHARE_CONN_STRING = os.environ['AzureWebJobsStorage']
 LOG_TYPE = 'Snowflake'
 
-MAX_SCRIPT_EXEC_TIME_MINUTES = 5
+MAX_SCRIPT_EXEC_TIME_MINUTES = 75
 
 LOG_ANALYTICS_URI = os.environ.get('logAnalyticsUri')
 
@@ -155,8 +155,9 @@ def parse_date_from(date_from: str) -> datetime.datetime:
 def get_login_events(ctx: snowflake.connector.SnowflakeConnection, date_from: datetime.datetime) -> Iterable[dict]:
     cs = ctx.cursor(DictCursor)
     try:
+        end_date = date_from + datetime.timedelta(days=7)
         cs.execute("use schema snowflake.account_usage")
-        cs.execute(f"SELECT * from LOGIN_HISTORY WHERE EVENT_TIMESTAMP > '{date_from.isoformat()}' ORDER BY EVENT_TIMESTAMP ASC")
+        cs.execute(f"SELECT * from LOGIN_HISTORY WHERE EVENT_TIMESTAMP > '{date_from.isoformat()}' AND EVENT_TIMESTAMP < '{end_date.isoformat()}' ORDER BY EVENT_TIMESTAMP ASC")
         for row in cs:
             row = parse_login_event(row)
             yield row
@@ -167,8 +168,9 @@ def get_login_events(ctx: snowflake.connector.SnowflakeConnection, date_from: da
 def get_reader_login_events(ctx: snowflake.connector.SnowflakeConnection, date_from: datetime.datetime) -> Iterable[dict]:
     cs = ctx.cursor(DictCursor)
     try:
+        end_date = date_from + datetime.timedelta(days=7)
         cs.execute("use schema snowflake.reader_account_usage")
-        cs.execute(f"SELECT * from LOGIN_HISTORY WHERE EVENT_TIMESTAMP > '{date_from.isoformat()}' ORDER BY EVENT_TIMESTAMP ASC")
+        cs.execute(f"SELECT * from LOGIN_HISTORY WHERE EVENT_TIMESTAMP > '{date_from.isoformat()}' AND EVENT_TIMESTAMP < '{end_date.isoformat()}' ORDER BY EVENT_TIMESTAMP ASC")
         for row in cs:
             row = parse_login_event(row)
             yield row
@@ -179,8 +181,9 @@ def get_reader_login_events(ctx: snowflake.connector.SnowflakeConnection, date_f
 def get_query_events(ctx: snowflake.connector.SnowflakeConnection, date_from: datetime.datetime) -> Iterable[dict]:
     cs = ctx.cursor(DictCursor)
     try:
+        end_date = date_from + datetime.timedelta(days=7)
         cs.execute("use schema snowflake.account_usage")
-        cs.execute(f"SELECT * from QUERY_HISTORY WHERE START_TIME > '{date_from.isoformat()}' ORDER BY START_TIME ASC")
+        cs.execute(f"SELECT * from QUERY_HISTORY WHERE START_TIME > '{date_from.isoformat()}' AND START_TIME < '{end_date.isoformat()}' ORDER BY START_TIME ASC")
         for row in cs:
             row = parse_query_event(row)
             yield row
@@ -191,8 +194,9 @@ def get_query_events(ctx: snowflake.connector.SnowflakeConnection, date_from: da
 def get_reader_query_events(ctx: snowflake.connector.SnowflakeConnection, date_from: datetime.datetime) -> Iterable[dict]:
     cs = ctx.cursor(DictCursor)
     try:
+        end_date = date_from + datetime.timedelta(days=7)
         cs.execute("use schema snowflake.reader_account_usage")
-        cs.execute(f"SELECT * from QUERY_HISTORY WHERE START_TIME > '{date_from.isoformat()}' ORDER BY START_TIME ASC")
+        cs.execute(f"SELECT * from QUERY_HISTORY WHERE START_TIME > '{date_from.isoformat()}' AND START_TIME < '{end_date.isoformat()}' ORDER BY START_TIME ASC")
         for row in cs:
             row = parse_query_event(row)
             yield row
